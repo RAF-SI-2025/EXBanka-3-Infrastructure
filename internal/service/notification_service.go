@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"EXBanka/internal/config"
+	"github.com/RAF-SI-2025/EXBanka-3-Infrastructure/internal/config"
 
 	"gopkg.in/gomail.v2"
 )

@@ -1,0 +1,136 @@
+syntax = "proto3";
+
+package client.v1;
+
+option go_package = "github.com/RAF-SI-2025/EXBanka-3-Infrastructure/gen/proto/client/v1;clientv1";
+
+import "google/api/annotations.proto";
+
+service ClientService {
+  rpc CreateClient(CreateClientRequest) returns (CreateClientResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/clients"
+      body: "*"
+    };
+  }
+
+  rpc GetClient(GetClientRequest) returns (GetClientResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/clients/{id}"
+    };
+  }
+
+  rpc ListClients(ListClientsRequest) returns (ListClientsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/clients"
+    };
+  }
+
+  rpc UpdateClient(UpdateClientRequest) returns (UpdateClientResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/clients/{id}"
+      body: "*"
+    };
+  }
+
+  rpc UpdateClientPermissions(UpdateClientPermissionsRequest) returns (UpdateClientPermissionsResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/clients/{id}/permissions"
+      body: "*"
+    };
+  }
+}
+
+message ClientProto {
+  uint64 id               = 1;
+  string ime              = 2;
+  string prezime          = 3;
+  int64 datum_rodjenja    = 4;
+  string pol              = 5;
+  string email            = 6;
+  string broj_telefona    = 7;
+  string adresa           = 8;
+  string povezani_racuni  = 9;
+  repeated PermissionProto permissions = 10;
+}
+
+message PermissionProto {
+  uint64 id          = 1;
+  string name        = 2;
+  string description = 3;
+}
+
+message ClientListItem {
+  uint64 id               = 1;
+  string ime              = 2;
+  string prezime          = 3;
+  string email            = 4;
+  string broj_telefona    = 5;
+  string povezani_racuni  = 6;
+  repeated string permission_names = 7;
+}
+
+message CreateClientRequest {
+  string ime             = 1;
+  string prezime         = 2;
+  int64 datum_rodjenja   = 3;
+  string pol             = 4;
+  string email           = 5;
+  string broj_telefona   = 6;
+  string adresa          = 7;
+  string povezani_racuni = 8;
+}
+
+message CreateClientResponse {
+  ClientProto client = 1;
+  string message     = 2;
+}
+
+message GetClientRequest {
+  uint64 id = 1;
+}
+
+message GetClientResponse {
+  ClientProto client = 1;
+}
+
+message ListClientsRequest {
+  string email_filter = 1;
+  string name_filter  = 2;
+  int32 page          = 3;
+  int32 page_size     = 4;
+}
+
+message ListClientsResponse {
+  repeated ClientListItem clients = 1;
+  int64 total                     = 2;
+  int32 page                      = 3;
+  int32 page_size                 = 4;
+}
+
+message UpdateClientRequest {
+  uint64 id             = 1;
+  string ime            = 2;
+  string prezime        = 3;
+  int64 datum_rodjenja  = 4;
+  string pol            = 5;
+  string email          = 6;
+  string broj_telefona  = 7;
+  string adresa         = 8;
+  string povezani_racuni = 9;
+}
+
+message UpdateClientResponse {
+  ClientProto client = 1;
+  string message     = 2;
+}
+
+message UpdateClientPermissionsRequest {
+  uint64 id = 1;
+  repeated string permission_names = 2;
+}
+
+message UpdateClientPermissionsResponse {
+  repeated PermissionProto permissions = 1;
+  string message = 2;
+}

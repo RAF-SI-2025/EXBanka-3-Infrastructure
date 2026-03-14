@@ -1,17 +1,56 @@
-# Environment
-.env
+# OS files
+.DS_Store
+Thumbs.db
 
-# Build output
-bin/
-
-# Generated proto code (regenerate with: make proto)
-gen/proto/
-
-# Go
-*.sum
-vendor/
-
-# IDE
+# IDE / Editor
 .idea/
 .vscode/
+*.iml
 *.swp
+*.swo
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Logs
+logs/
+*.log
+*.pid
+
+# Go build / temp output
+.gocache/
+bin/
+build/
+dist/
+out/
+tmp/
+temp/
+*.test
+*.out
+coverage.out
+coverage.html
+
+# Docker / local runtime artifacts
+.docker/
+docker-data/
+pgdata/
+data/
+
+# Terraform
+.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.orig

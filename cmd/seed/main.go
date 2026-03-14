@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 
-	"EXBanka/internal/config"
-	"EXBanka/internal/database"
+	"github.com/RAF-SI-2025/EXBanka-3-Infrastructure/internal/config"
+	"github.com/RAF-SI-2025/EXBanka-3-Infrastructure/internal/database"
 )
 
 func main() {

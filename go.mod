@@ -1,6 +1,6 @@
-module EXBanka
+module github.com/RAF-SI-2025/EXBanka-3-Infrastructure
 
-go 1.22
+go 1.26
 
 require (
 	github.com/golang-jwt/jwt/v5 v5.2.1

@@ -3,7 +3,7 @@ package repository
 import (
 	"time"
 
-	"EXBanka/internal/models"
+	"github.com/RAF-SI-2025/EXBanka-3-Infrastructure/internal/models"
 
 	"gorm.io/gorm"
 )

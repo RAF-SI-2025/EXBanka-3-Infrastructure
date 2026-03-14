@@ -5,8 +5,8 @@ import (
 	"log"
 	"time"
 
-	"EXBanka/internal/models"
-	"EXBanka/internal/util"
+	"github.com/RAF-SI-2025/EXBanka-3-Infrastructure/internal/models"
+	"github.com/RAF-SI-2025/EXBanka-3-Infrastructure/internal/util"
 
 	"gorm.io/gorm"
 )
@@ -14,9 +14,51 @@ import (
 // SeedDefaultAdmin creates the default admin user on a fresh database.
 // The operation is idempotent and safely skips creation if the user exists.
 func SeedDefaultAdmin(db *gorm.DB) error {
+	const defaultAdminPassword = "Admin123!"
+
 	var existing models.Employee
 	if result := db.Where("email = ?", "admin@bank.com").First(&existing); result.Error == nil {
-		log.Println("Admin already exists, skipping seed")
+		ok, err := util.VerifyPassword(defaultAdminPassword, existing.SaltPassword, existing.Password)
+		if err != nil {
+			return fmt.Errorf("failed to verify existing admin password: %w", err)
+		}
+
+		var allPerms []models.Permission
+		if err := db.Where("subject_type = ?", models.PermissionSubjectEmployee).Find(&allPerms).Error; err != nil {
+			return fmt.Errorf("failed to fetch permissions: %w", err)
+		}
+
+		if ok && existing.Aktivan {
+			if err := db.Model(&existing).Association("Permissions").Replace(allPerms); err != nil {
+				return fmt.Errorf("failed to sync admin permissions: %w", err)
+			}
+			log.Println("Admin already exists, skipping seed")
+			return nil
+		}
+
+		salt, err := util.GenerateSalt()
+		if err != nil {
+			return fmt.Errorf("failed to generate salt: %w", err)
+		}
+
+		hashedPwd, err := util.HashPassword(defaultAdminPassword, salt)
+		if err != nil {
+			return fmt.Errorf("failed to hash password: %w", err)
+		}
+
+		updates := map[string]interface{}{
+			"password":      hashedPwd,
+			"salt_password": salt,
+			"aktivan":       true,
+		}
+		if err := db.Model(&existing).Updates(updates).Error; err != nil {
+			return fmt.Errorf("failed to repair existing admin: %w", err)
+		}
+		if err := db.Model(&existing).Association("Permissions").Replace(allPerms); err != nil {
+			return fmt.Errorf("failed to sync admin permissions: %w", err)
+		}
+
+		log.Println("Default admin user repaired successfully")
 		return nil
 	} else if result.Error != nil && result.Error != gorm.ErrRecordNotFound {
 		return fmt.Errorf("failed to check existing admin: %w", result.Error)
@@ -27,13 +69,13 @@ func SeedDefaultAdmin(db *gorm.DB) error {
 		return fmt.Errorf("failed to generate salt: %w", err)
 	}
 
-	hashedPwd, err := util.HashPassword("Admin123!", salt)
+	hashedPwd, err := util.HashPassword(defaultAdminPassword, salt)
 	if err != nil {
 		return fmt.Errorf("failed to hash password: %w", err)
 	}
 
 	var allPerms []models.Permission
-	if err := db.Find(&allPerms).Error; err != nil {
+	if err := db.Where("subject_type = ?", models.PermissionSubjectEmployee).Find(&allPerms).Error; err != nil {
 		return fmt.Errorf("failed to fetch permissions: %w", err)
 	}
 
