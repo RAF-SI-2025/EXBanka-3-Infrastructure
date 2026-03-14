@@ -6,7 +6,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 
-	"EXBanka/internal/util"
+	"github.com/RAF-SI-2025/EXBanka-3-Infrastructure/internal/util"
 )
 
 const testSecret = "test-jwt-secret-key"

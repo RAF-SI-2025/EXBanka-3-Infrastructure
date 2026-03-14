@@ -9,14 +9,14 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
-	"EXBanka/internal/config"
-	"EXBanka/internal/models"
-	"EXBanka/internal/util"
+	"github.com/RAF-SI-2025/EXBanka-3-Infrastructure/internal/config"
+	"github.com/RAF-SI-2025/EXBanka-3-Infrastructure/internal/models"
+	"github.com/RAF-SI-2025/EXBanka-3-Infrastructure/internal/util"
 )
 
 // publicMethods are RPC methods that do not require a JWT
 var publicMethods = map[string]bool{
-	"/auth.v1.AuthService/Login":               true,
+	"/auth.v1.AuthService/Login":                true,
 	"/auth.v1.AuthService/ActivateAccount":      true,
 	"/auth.v1.AuthService/RequestPasswordReset": true,
 	"/auth.v1.AuthService/ResetPassword":        true,
@@ -32,6 +32,11 @@ var requiredPermissions = map[string]string{
 	"/employee.v1.EmployeeService/SetEmployeeActive":         models.PermEmployeeActivate,
 	"/employee.v1.EmployeeService/UpdateEmployeePermissions": models.PermEmployeePermissions,
 	"/employee.v1.EmployeeService/GetAllPermissions":         models.PermEmployeeRead,
+	"/client.v1.ClientService/CreateClient":                  models.PermAdmin,
+	"/client.v1.ClientService/GetClient":                     models.PermAdmin,
+	"/client.v1.ClientService/ListClients":                   models.PermAdmin,
+	"/client.v1.ClientService/UpdateClient":                  models.PermAdmin,
+	"/client.v1.ClientService/UpdateClientPermissions":       models.PermAdmin,
 }
 
 // claimsContextKey is the unexported context key for JWT claims

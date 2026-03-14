@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package employee.v1;
 
-option go_package = "EXBanka/gen/proto/employee/v1;employeev1";
+option go_package = "github.com/RAF-SI-2025/EXBanka-3-Infrastructure/gen/proto/employee/v1;employeev1";
 
 import "google/api/annotations.proto";
 import "google/protobuf/timestamp.proto";

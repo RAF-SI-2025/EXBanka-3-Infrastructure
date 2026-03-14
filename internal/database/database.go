@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 
-	"EXBanka/internal/config"
-	"EXBanka/internal/models"
+	"github.com/RAF-SI-2025/EXBanka-3-Infrastructure/internal/config"
+	"github.com/RAF-SI-2025/EXBanka-3-Infrastructure/internal/models"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -46,9 +46,18 @@ func Migrate(db *gorm.DB) error {
 
 // SeedPermissions inserts default permissions if they don't already exist
 func SeedPermissions(db *gorm.DB) error {
+	if err := db.Model(&models.Permission{}).
+		Where("subject_type = '' OR subject_type IS NULL").
+		Update("subject_type", models.PermissionSubjectEmployee).Error; err != nil {
+		return fmt.Errorf("failed to backfill permission subject types: %w", err)
+	}
+
 	for _, perm := range models.DefaultPermissions {
 		p := perm
-		result := db.Where(models.Permission{Name: p.Name}).FirstOrCreate(&p)
+		result := db.Where(models.Permission{Name: p.Name}).Assign(models.Permission{
+			Description: p.Description,
+			SubjectType: p.SubjectType,
+		}).FirstOrCreate(&p)
 		if result.Error != nil {
 			return fmt.Errorf("failed to seed permission %q: %w", p.Name, result.Error)
 		}

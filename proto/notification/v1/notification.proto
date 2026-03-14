@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package notification.v1;
 
-option go_package = "EXBanka/gen/proto/notification/v1;notificationv1";
+option go_package = "github.com/RAF-SI-2025/EXBanka-3-Infrastructure/gen/proto/notification/v1;notificationv1";
 
 // NotificationService is internal only.
 // It is registered on the gRPC server but NOT exposed via the HTTP gateway.

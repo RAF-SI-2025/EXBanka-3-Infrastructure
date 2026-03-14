@@ -4,8 +4,15 @@ type Permission struct {
 	ID          uint       `gorm:"primaryKey;autoIncrement" json:"id"`
 	Name        string     `gorm:"uniqueIndex;not null" json:"name"`
 	Description string     `json:"description"`
+	SubjectType string     `gorm:"not null;default:employee;index" json:"subject_type"`
 	Employees   []Employee `gorm:"many2many:employee_permissions;" json:"-"`
+	Clients     []Client   `gorm:"many2many:client_permissions;" json:"-"`
 }
+
+const (
+	PermissionSubjectEmployee = "employee"
+	PermissionSubjectClient   = "client"
+)
 
 // Permission name constants
 const (
@@ -15,14 +22,18 @@ const (
 	PermEmployeeUpdate      = "employee.update"
 	PermEmployeeActivate    = "employee.activate"
 	PermEmployeePermissions = "employee.permissions"
+	PermClientBasic         = "client.basic"
+	PermClientTrading       = "client.trading"
 )
 
 // DefaultPermissions are seeded on first run
 var DefaultPermissions = []Permission{
-	{Name: PermAdmin, Description: "Full administrative access"},
-	{Name: PermEmployeeCreate, Description: "Can create new employees"},
-	{Name: PermEmployeeRead, Description: "Can read employee data"},
-	{Name: PermEmployeeUpdate, Description: "Can update employee data (non-admin targets only)"},
-	{Name: PermEmployeeActivate, Description: "Can activate/deactivate employees"},
-	{Name: PermEmployeePermissions, Description: "Can manage employee permissions"},
+	{Name: PermAdmin, Description: "Full administrative access", SubjectType: PermissionSubjectEmployee},
+	{Name: PermEmployeeCreate, Description: "Can create new employees", SubjectType: PermissionSubjectEmployee},
+	{Name: PermEmployeeRead, Description: "Can read employee data", SubjectType: PermissionSubjectEmployee},
+	{Name: PermEmployeeUpdate, Description: "Can update employee data (non-admin targets only)", SubjectType: PermissionSubjectEmployee},
+	{Name: PermEmployeeActivate, Description: "Can activate/deactivate employees", SubjectType: PermissionSubjectEmployee},
+	{Name: PermEmployeePermissions, Description: "Can manage employee permissions", SubjectType: PermissionSubjectEmployee},
+	{Name: PermClientBasic, Description: "Basic client role", SubjectType: PermissionSubjectClient},
+	{Name: PermClientTrading, Description: "Trading-enabled client role", SubjectType: PermissionSubjectClient},
 }

@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"EXBanka/internal/util"
+	"github.com/RAF-SI-2025/EXBanka-3-Infrastructure/internal/util"
 )
 
 func TestGenerateSalt(t *testing.T) {
