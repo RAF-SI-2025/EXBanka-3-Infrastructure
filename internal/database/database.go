@@ -36,6 +36,15 @@ func Migrate(db *gorm.DB) error {
 		&models.Client{},
 		&models.Permission{},
 		&models.Token{},
+		// Sprint 2 models
+		&models.Currency{},
+		&models.SifraDelatnosti{},
+		&models.SifraPlacanja{},
+		&models.Firma{},
+		&models.Account{},
+		&models.Transfer{},
+		&models.PaymentRecipient{},
+		&models.Payment{},
 	)
 	if err != nil {
 		return fmt.Errorf("migration failed: %w", err)
