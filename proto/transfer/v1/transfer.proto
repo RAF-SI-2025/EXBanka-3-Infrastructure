@@ -1,0 +1,82 @@
+syntax = "proto3";
+
+package transfer.v1;
+
+option go_package = "github.com/RAF-SI-2025/EXBanka-3-Infrastructure/gen/proto/transfer/v1;transferv1";
+
+import "google/api/annotations.proto";
+
+service TransferService {
+  rpc CreateTransfer(CreateTransferRequest) returns (CreateTransferResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/transfers"
+      body: "*"
+    };
+  }
+
+  rpc ListTransfersByAccount(ListTransfersByAccountRequest) returns (ListTransfersResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/transfers/account/{account_id}"
+    };
+  }
+
+  rpc ListTransfersByClient(ListTransfersByClientRequest) returns (ListTransfersResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/transfers/client/{client_id}"
+    };
+  }
+}
+
+message TransferProto {
+  uint64 id                   = 1;
+  uint64 racun_posiljaoca_id  = 2;
+  uint64 racun_primaoca_id    = 3;
+  double iznos                = 4;
+  string valuta_iznosa        = 5;
+  double konvertovani_iznos   = 6;
+  double kurs                 = 7;
+  string svrha                = 8;
+  string status               = 9;
+  string vreme_transakcije    = 10;
+}
+
+message CreateTransferRequest {
+  uint64 racun_posiljaoca_id = 1;
+  uint64 racun_primaoca_id   = 2;
+  double iznos               = 3;
+  string svrha               = 4;
+}
+
+message CreateTransferResponse {
+  TransferProto transfer = 1;
+  string message         = 2;
+}
+
+message ListTransfersByAccountRequest {
+  uint64 account_id  = 1;
+  string date_from   = 2;
+  string date_to     = 3;
+  double min_amount  = 4;
+  double max_amount  = 5;
+  string status      = 6;
+  int32  page        = 7;
+  int32  page_size   = 8;
+}
+
+message ListTransfersByClientRequest {
+  uint64 client_id   = 1;
+  string date_from   = 2;
+  string date_to     = 3;
+  double min_amount  = 4;
+  double max_amount  = 5;
+  string status      = 6;
+  int32  page        = 7;
+  int32  page_size   = 8;
+}
+
+message ListTransfersResponse {
+  repeated TransferProto transfers = 1;
+  int64 total                      = 2;
+  int32 page                       = 3;
+  int32 page_size                  = 4;
+}
