@@ -1,0 +1,113 @@
+# Gateway API HTTPRoute for the elab cluster (Envoy Gateway), replacing the
+# nginx Ingress. One rule per service: PathPrefix /<slug> is matched, the slug
+# is stripped via URLRewrite (ReplacePrefixMatch /), so each backend receives
+# the /api/v1/... path it already serves. The frontend catchall (/) is last and
+# does NOT rewrite, so the SPA + /config.js + assets are served as-is.
+#
+# CONFIRM BEFORE APPLY (run: kubectl get gateway -A):
+#   - parentRefs.name  : the team Gateway in envoy-gateway-system (TA's example
+#                        used "banka-gw" for banka-2 -> likely "exbanka-3-gw" for us)
+#   - hostnames        : the real domain from the TA (TA example: banka-2.radenkovic.rs
+#                        -> likely exbanka-3.radenkovic.rs)
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: exbanka-3
+  namespace: exbanka-3
+  labels:
+    app.kubernetes.io/name: exbanka
+    app.kubernetes.io/part-of: exbanka
+spec:
+  parentRefs:
+    - name: banka-gw                # shared Envoy Gateway (confirmed via kubectl get gateway -A)
+      namespace: envoy-gateway-system
+  hostnames:
+    - exbanka-3.radenkovic.rs       # pattern is <team>.radenkovic.rs; confirm exact host with TA
+  rules:
+    - matches:
+        - path: {type: PathPrefix, value: /auth}
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path: {type: ReplacePrefixMatch, replacePrefixMatch: /}
+      backendRefs:
+        - name: auth-service
+          port: 8081
+    - matches:
+        - path: {type: PathPrefix, value: /account}
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path: {type: ReplacePrefixMatch, replacePrefixMatch: /}
+      backendRefs:
+        - name: account-service
+          port: 8084
+    - matches:
+        - path: {type: PathPrefix, value: /client}
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path: {type: ReplacePrefixMatch, replacePrefixMatch: /}
+      backendRefs:
+        - name: client-service
+          port: 8083
+    - matches:
+        - path: {type: PathPrefix, value: /employee}
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path: {type: ReplacePrefixMatch, replacePrefixMatch: /}
+      backendRefs:
+        - name: employee-service
+          port: 8082
+    - matches:
+        - path: {type: PathPrefix, value: /transfer}
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path: {type: ReplacePrefixMatch, replacePrefixMatch: /}
+      backendRefs:
+        - name: transfer-service
+          port: 8086
+    - matches:
+        - path: {type: PathPrefix, value: /payment}
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path: {type: ReplacePrefixMatch, replacePrefixMatch: /}
+      backendRefs:
+        - name: payment-service
+          port: 8087
+    - matches:
+        - path: {type: PathPrefix, value: /exchange}
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path: {type: ReplacePrefixMatch, replacePrefixMatch: /}
+      backendRefs:
+        - name: exchange-service
+          port: 8088
+    - matches:
+        - path: {type: PathPrefix, value: /loan}
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path: {type: ReplacePrefixMatch, replacePrefixMatch: /}
+      backendRefs:
+        - name: loan-service
+          port: 8089
+    - matches:
+        - path: {type: PathPrefix, value: /core}
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path: {type: ReplacePrefixMatch, replacePrefixMatch: /}
+      backendRefs:
+        - name: backend
+          port: 8080
+    # Frontend SPA + /config.js + static assets — catchall, no rewrite, kept last.
+    - matches:
+        - path: {type: PathPrefix, value: /}
+      backendRefs:
+        - name: frontend
+          port: 80
