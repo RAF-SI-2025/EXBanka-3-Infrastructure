@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: backend
-  namespace: exbanka
+  namespace: exbanka-3
   labels:
     app.kubernetes.io/name: backend
     app.kubernetes.io/part-of: exbanka
@@ -19,8 +19,8 @@ spec:
     spec:
       containers:
         - name: backend
-          image: ghcr.io/dt30f/exbanka-3-backend/backend:replace-with-git-sha
-          imagePullPolicy: IfNotPresent
+          image: ghcr.io/raf-si-2025/exbanka-3-backend:latest
+          imagePullPolicy: Always
           ports:
             - name: http
               containerPort: 8080
@@ -60,7 +60,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: auth-service
-  namespace: exbanka
+  namespace: exbanka-3
   labels:
     app.kubernetes.io/name: auth-service
     app.kubernetes.io/part-of: exbanka
@@ -77,8 +77,8 @@ spec:
     spec:
       containers:
         - name: auth-service
-          image: ghcr.io/dt30f/exbanka-3-backend/auth-service:replace-with-git-sha
-          imagePullPolicy: IfNotPresent
+          image: ghcr.io/raf-si-2025/exbanka-3-auth-service:latest
+          imagePullPolicy: Always
           ports:
             - name: http
               containerPort: 8081
@@ -94,6 +94,16 @@ spec:
               value: "8081"
             - name: GRPC_PORT
               value: "9091"
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: db-pguser-banking-service
+                  key: user
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-pguser-banking-service
+                  key: password
           readinessProbe:
             httpGet:
               path: /ready
@@ -118,7 +128,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: employee-service
-  namespace: exbanka
+  namespace: exbanka-3
   labels:
     app.kubernetes.io/name: employee-service
     app.kubernetes.io/part-of: exbanka
@@ -135,8 +145,8 @@ spec:
     spec:
       containers:
         - name: employee-service
-          image: ghcr.io/dt30f/exbanka-3-backend/employee-service:replace-with-git-sha
-          imagePullPolicy: IfNotPresent
+          image: ghcr.io/raf-si-2025/exbanka-3-employee-service:latest
+          imagePullPolicy: Always
           ports:
             - name: http
               containerPort: 8082
@@ -152,6 +162,16 @@ spec:
               value: "8082"
             - name: GRPC_PORT
               value: "9092"
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: db-pguser-banking-service
+                  key: user
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-pguser-banking-service
+                  key: password
           readinessProbe:
             httpGet:
               path: /ready
@@ -176,7 +196,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: client-service
-  namespace: exbanka
+  namespace: exbanka-3
   labels:
     app.kubernetes.io/name: client-service
     app.kubernetes.io/part-of: exbanka
@@ -193,8 +213,8 @@ spec:
     spec:
       containers:
         - name: client-service
-          image: ghcr.io/dt30f/exbanka-3-backend/client-service:replace-with-git-sha
-          imagePullPolicy: IfNotPresent
+          image: ghcr.io/raf-si-2025/exbanka-3-client-service:latest
+          imagePullPolicy: Always
           ports:
             - name: http
               containerPort: 8083
@@ -210,6 +230,16 @@ spec:
               value: "8083"
             - name: GRPC_PORT
               value: "9093"
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: db-pguser-banking-service
+                  key: user
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-pguser-banking-service
+                  key: password
           readinessProbe:
             httpGet:
               path: /ready
@@ -234,7 +264,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: account-service
-  namespace: exbanka
+  namespace: exbanka-3
   labels:
     app.kubernetes.io/name: account-service
     app.kubernetes.io/part-of: exbanka
@@ -251,8 +281,8 @@ spec:
     spec:
       containers:
         - name: account-service
-          image: ghcr.io/dt30f/exbanka-3-backend/account-service:replace-with-git-sha
-          imagePullPolicy: IfNotPresent
+          image: ghcr.io/raf-si-2025/exbanka-3-account-service:latest
+          imagePullPolicy: Always
           ports:
             - name: http
               containerPort: 8084
@@ -268,6 +298,16 @@ spec:
               value: "8084"
             - name: GRPC_PORT
               value: "9094"
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: db-pguser-banking-service
+                  key: user
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-pguser-banking-service
+                  key: password
           readinessProbe:
             httpGet:
               path: /ready
@@ -292,7 +332,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: transfer-service
-  namespace: exbanka
+  namespace: exbanka-3
   labels:
     app.kubernetes.io/name: transfer-service
     app.kubernetes.io/part-of: exbanka
@@ -309,8 +349,8 @@ spec:
     spec:
       containers:
         - name: transfer-service
-          image: ghcr.io/dt30f/exbanka-3-backend/transfer-service:replace-with-git-sha
-          imagePullPolicy: IfNotPresent
+          image: ghcr.io/raf-si-2025/exbanka-3-transfer-service:latest
+          imagePullPolicy: Always
           ports:
             - name: http
               containerPort: 8086
@@ -326,6 +366,16 @@ spec:
               value: "8086"
             - name: GRPC_PORT
               value: "9096"
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: db-pguser-banking-service
+                  key: user
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-pguser-banking-service
+                  key: password
           readinessProbe:
             httpGet:
               path: /ready
@@ -350,7 +400,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: payment-service
-  namespace: exbanka
+  namespace: exbanka-3
   labels:
     app.kubernetes.io/name: payment-service
     app.kubernetes.io/part-of: exbanka
@@ -367,8 +417,8 @@ spec:
     spec:
       containers:
         - name: payment-service
-          image: ghcr.io/dt30f/exbanka-3-backend/payment-service:replace-with-git-sha
-          imagePullPolicy: IfNotPresent
+          image: ghcr.io/raf-si-2025/exbanka-3-payment-service:latest
+          imagePullPolicy: Always
           ports:
             - name: http
               containerPort: 8087
@@ -384,6 +434,16 @@ spec:
               value: "8087"
             - name: GRPC_PORT
               value: "9097"
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: db-pguser-banking-service
+                  key: user
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-pguser-banking-service
+                  key: password
           readinessProbe:
             httpGet:
               path: /ready
@@ -408,7 +468,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: exchange-service
-  namespace: exbanka
+  namespace: exbanka-3
   labels:
     app.kubernetes.io/name: exchange-service
     app.kubernetes.io/part-of: exbanka
@@ -425,8 +485,8 @@ spec:
     spec:
       containers:
         - name: exchange-service
-          image: ghcr.io/dt30f/exbanka-3-backend/exchange-service:replace-with-git-sha
-          imagePullPolicy: IfNotPresent
+          image: ghcr.io/raf-si-2025/exbanka-3-exchange-service:latest
+          imagePullPolicy: Always
           ports:
             - name: http
               containerPort: 8088
@@ -442,6 +502,16 @@ spec:
               value: "8088"
             - name: GRPC_PORT
               value: "9098"
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: db-pguser-banking-service
+                  key: user
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-pguser-banking-service
+                  key: password
           readinessProbe:
             httpGet:
               path: /ready
@@ -466,7 +536,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: loan-service
-  namespace: exbanka
+  namespace: exbanka-3
   labels:
     app.kubernetes.io/name: loan-service
     app.kubernetes.io/part-of: exbanka
@@ -483,8 +553,8 @@ spec:
     spec:
       containers:
         - name: loan-service
-          image: ghcr.io/dt30f/exbanka-3-backend/loan-service:replace-with-git-sha
-          imagePullPolicy: IfNotPresent
+          image: ghcr.io/raf-si-2025/exbanka-3-loan-service:latest
+          imagePullPolicy: Always
           ports:
             - name: http
               containerPort: 8089
@@ -496,6 +566,16 @@ spec:
           env:
             - name: HTTP_PORT
               value: "8089"
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: db-pguser-banking-service
+                  key: user
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-pguser-banking-service
+                  key: password
           readinessProbe:
             httpGet:
               path: /ready
@@ -520,7 +600,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: frontend
-  namespace: exbanka
+  namespace: exbanka-3
   labels:
     app.kubernetes.io/name: frontend
     app.kubernetes.io/part-of: exbanka
@@ -537,11 +617,14 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: ghcr.io/dt30f/exbanka-3-frontend/frontend:replace-with-git-sha
-          imagePullPolicy: IfNotPresent
+          image: ghcr.io/raf-si-2025/exbanka-3-frontend:latest
+          imagePullPolicy: Always
           ports:
             - name: http
               containerPort: 80
+          envFrom:
+            - configMapRef:
+                name: exbanka-app-config
           readinessProbe:
             httpGet:
               path: /

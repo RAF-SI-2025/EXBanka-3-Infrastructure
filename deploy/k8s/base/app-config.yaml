@@ -2,19 +2,35 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: exbanka-app-config
-  namespace: exbanka
+  namespace: exbanka-3
   labels:
     app.kubernetes.io/part-of: exbanka
 data:
-  DB_HOST: exbanka-postgres-rw.exbanka-db.svc.cluster.local
+  # Postgres is provisioned by the TA via the Crunchy Postgres Operator
+  # (db.yaml at the EXBanka workspace root). Apps connect through PgBouncer.
+  # DB_USER and DB_PASSWORD do NOT come from here — they come from the
+  # operator-generated Secret `db-pguser-banking-service` (see deployments.yaml).
+  DB_HOST: db-pgbouncer.exbanka-3.svc.cluster.local
   DB_PORT: "5432"
-  DB_NAME: bankdb
+  DB_NAME: banking-service-db
   DB_SSL_MODE: disable
   JWT_ACCESS_DURATION_MINUTES: "15"
   JWT_REFRESH_DURATION_HOURS: "24"
   SMTP_HOST: mailhog
   SMTP_PORT: "1025"
   SMTP_FROM: noreply@bank.com
+  # FRONTEND_URL is the URL the backend embeds in outgoing emails (password
+  # reset, activation). Swap host to the real domain when known.
   FRONTEND_URL: http://exbanka.local
-  REDIS_ADDR: exbanka-redis-master.exbanka.svc.cluster.local:6379
+  REDIS_ADDR: exbanka-redis-master.exbanka-3.svc.cluster.local:6379
   REDIS_DB: "0"
+  # Cross-service HTTP — transfer-service → exchange-service. Internal call,
+  # stays inside the cluster, never goes through the public Ingress.
+  EXCHANGE_SERVICE_URL: http://exchange-service.exbanka-3.svc.cluster.local:8088
+  # Inter-bank protocol — this bank's 3-digit routing prefix.
+  BANK_ROUTING_NUMBER: "333"
+  # Frontend runtime config (consumed by the frontend container's entrypoint,
+  # which regenerates /config.js before nginx starts). Other pods see these
+  # env vars but ignore them.
+  API_ORIGIN: http://exbanka.local
+  USE_SLUGS: "true"

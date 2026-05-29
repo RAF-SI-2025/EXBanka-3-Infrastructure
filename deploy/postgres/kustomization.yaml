@@ -1,5 +1,8 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-resources:
-  - cloudnativepg-cluster.yaml
+# CloudNativePG cluster manifest was removed — the TA provisions Postgres for
+# every team via the Crunchy Postgres Operator (see ../../db.yaml at repo root
+# of the parent EXBanka workspace). Apps consume the operator-generated user
+# Secret (`db-pguser-banking-service`) and connect through PgBouncer.
+resources: []

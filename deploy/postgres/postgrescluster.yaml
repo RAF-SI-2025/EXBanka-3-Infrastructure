@@ -1,0 +1,78 @@
+# EXBanka-3 PostgresCluster — adapted from the TA's db.yaml template.
+#
+# Crunchy Postgres Operator is installed cluster-wide on the elab cluster and
+# reconciles a `db` PostgresCluster per team namespace (banka-1/2/4 already have
+# one). This is ours for exbanka-3.
+#
+# Applying this makes the operator auto-generate, in namespace exbanka-3:
+#   - Service  db-pgbouncer            (what app ConfigMap DB_HOST points at)
+#   - Secret   db-pguser-banking-service  (keys: user, password — pulled by every
+#                                           backend Deployment via secretKeyRef)
+#   - Secret   db-pguser-user-service
+#
+# Apply standalone (NOT part of deploy/k8s/base kustomization — DB lifecycle is
+# managed separately from the app):
+#   kubectl apply -f deploy/postgres/postgrescluster.yaml
+apiVersion: postgres-operator.crunchydata.com/v1beta1
+kind: PostgresCluster
+metadata:
+  name: db
+  namespace: exbanka-3
+spec:
+  image: registry.developers.crunchydata.com/crunchydata/crunchy-postgres:ubi9-17.9-2610
+  postgresVersion: 17
+  instances:
+    - name: instance1
+      replicas: 3
+      dataVolumeClaimSpec:
+        accessModes:
+        - "ReadWriteOnce"
+        resources:
+          requests:
+            storage: 30Gi
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 1
+            podAffinityTerm:
+              topologyKey: kubernetes.io/hostname
+              labelSelector:
+                matchLabels:
+                  # Cluster NAME (metadata.name), not the namespace. The operator
+                  # labels pods with cluster=db; the TA template used the namespace
+                  # here, which made this soft rule match nothing.
+                  postgres-operator.crunchydata.com/cluster: db
+                  postgres-operator.crunchydata.com/instance-set: instance1
+  backups:
+    pgbackrest:
+      image: registry.developers.crunchydata.com/crunchydata/crunchy-pgbackrest:ubi9-2.58.0-2610
+      repos:
+      - name: repo1
+        volume:
+          volumeClaimSpec:
+            accessModes:
+            - "ReadWriteOnce"
+            resources:
+              requests:
+                storage: 30Gi
+  proxy:
+    pgBouncer:
+      replicas: 2
+      image: registry.developers.crunchydata.com/crunchydata/crunchy-pgbouncer:ubi9-1.25-2610
+      resources:
+        limits:
+          cpu: 200m
+          memory: 128Mi
+  users:
+    - name: user-service
+      password:
+        type: "AlphaNumeric"
+      databases:
+        - user-service-db
+      options: "SUPERUSER"
+    - name: banking-service
+      password:
+        type: "AlphaNumeric"
+      databases:
+        - banking-service-db
+      options: "SUPERUSER"
