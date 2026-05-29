@@ -69,10 +69,12 @@ spec:
         type: "AlphaNumeric"
       databases:
         - user-service-db
-      options: "SUPERUSER"
+      # No SUPERUSER: Crunchy PgBouncer's auth_query excludes superuser roles
+      # ("NOT rolsuper"), so a superuser cannot authenticate through PgBouncer.
+      # The user owns its database, which is all the app needs.
     - name: banking-service
       password:
         type: "AlphaNumeric"
       databases:
         - banking-service-db
-      options: "SUPERUSER"
+      # No SUPERUSER (see note above) — required for PgBouncer auth to work.

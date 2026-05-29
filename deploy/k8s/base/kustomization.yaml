@@ -6,5 +6,5 @@ resources:
   - app-config.yaml
   - deployments.yaml
   - services.yaml
-  - ingress.yaml
+  - route.yaml
   - mailhog.yaml
