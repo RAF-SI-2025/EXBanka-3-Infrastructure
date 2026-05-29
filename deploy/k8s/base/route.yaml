@@ -1,14 +1,17 @@
 # Gateway API HTTPRoute for the elab cluster (Envoy Gateway), replacing the
-# nginx Ingress. One rule per service: PathPrefix /<slug> is matched, the slug
-# is stripped via URLRewrite (ReplacePrefixMatch /), so each backend receives
-# the /api/v1/... path it already serves. The frontend catchall (/) is last and
-# does NOT rewrite, so the SPA + /config.js + assets are served as-is.
+# nginx Ingress. Each backend rule matches PathPrefix /<slug>/api and rewrites
+# the /<slug> prefix away (ReplacePrefixMatch /api), so the service receives the
+# /api/v1/... path it serves. The frontend is the catchall (/) with NO rewrite.
 #
-# CONFIRM BEFORE APPLY (run: kubectl get gateway -A):
-#   - parentRefs.name  : the team Gateway in envoy-gateway-system (TA's example
-#                        used "banka-gw" for banka-2 -> likely "exbanka-3-gw" for us)
-#   - hostnames        : the real domain from the TA (TA example: banka-2.radenkovic.rs
-#                        -> likely exbanka-3.radenkovic.rs)
+# Why match /<slug>/api and not just /<slug>: the Vue SPA has page routes that
+# start with a service name (e.g. /client/login, /client). Matching only
+# /<slug>/api means those SPA pages fall through to the frontend instead of
+# being shadowed by the API backend. The frontend only ever calls the API at
+# /<slug>/api/v1/... (see resolveApiUrl), so no API traffic is lost.
+#
+# parentRefs.name banka-gw + host exbanka-3.radenkovic.rs confirmed against the
+# live cluster (kubectl get gateway -A; listener https-exbanka-3 + cert
+# exbanka-3-tls already exist).
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
@@ -19,89 +22,89 @@ metadata:
     app.kubernetes.io/part-of: exbanka
 spec:
   parentRefs:
-    - name: banka-gw                # shared Envoy Gateway (confirmed via kubectl get gateway -A)
+    - name: banka-gw
       namespace: envoy-gateway-system
   hostnames:
-    - exbanka-3.radenkovic.rs       # pattern is <team>.radenkovic.rs; confirm exact host with TA
+    - exbanka-3.radenkovic.rs
   rules:
     - matches:
-        - path: {type: PathPrefix, value: /auth}
+        - path: {type: PathPrefix, value: /auth/api}
       filters:
         - type: URLRewrite
           urlRewrite:
-            path: {type: ReplacePrefixMatch, replacePrefixMatch: /}
+            path: {type: ReplacePrefixMatch, replacePrefixMatch: /api}
       backendRefs:
         - name: auth-service
           port: 8081
     - matches:
-        - path: {type: PathPrefix, value: /account}
+        - path: {type: PathPrefix, value: /account/api}
       filters:
         - type: URLRewrite
           urlRewrite:
-            path: {type: ReplacePrefixMatch, replacePrefixMatch: /}
+            path: {type: ReplacePrefixMatch, replacePrefixMatch: /api}
       backendRefs:
         - name: account-service
           port: 8084
     - matches:
-        - path: {type: PathPrefix, value: /client}
+        - path: {type: PathPrefix, value: /client/api}
       filters:
         - type: URLRewrite
           urlRewrite:
-            path: {type: ReplacePrefixMatch, replacePrefixMatch: /}
+            path: {type: ReplacePrefixMatch, replacePrefixMatch: /api}
       backendRefs:
         - name: client-service
           port: 8083
     - matches:
-        - path: {type: PathPrefix, value: /employee}
+        - path: {type: PathPrefix, value: /employee/api}
       filters:
         - type: URLRewrite
           urlRewrite:
-            path: {type: ReplacePrefixMatch, replacePrefixMatch: /}
+            path: {type: ReplacePrefixMatch, replacePrefixMatch: /api}
       backendRefs:
         - name: employee-service
           port: 8082
     - matches:
-        - path: {type: PathPrefix, value: /transfer}
+        - path: {type: PathPrefix, value: /transfer/api}
       filters:
         - type: URLRewrite
           urlRewrite:
-            path: {type: ReplacePrefixMatch, replacePrefixMatch: /}
+            path: {type: ReplacePrefixMatch, replacePrefixMatch: /api}
       backendRefs:
         - name: transfer-service
           port: 8086
     - matches:
-        - path: {type: PathPrefix, value: /payment}
+        - path: {type: PathPrefix, value: /payment/api}
       filters:
         - type: URLRewrite
           urlRewrite:
-            path: {type: ReplacePrefixMatch, replacePrefixMatch: /}
+            path: {type: ReplacePrefixMatch, replacePrefixMatch: /api}
       backendRefs:
         - name: payment-service
           port: 8087
     - matches:
-        - path: {type: PathPrefix, value: /exchange}
+        - path: {type: PathPrefix, value: /exchange/api}
       filters:
         - type: URLRewrite
           urlRewrite:
-            path: {type: ReplacePrefixMatch, replacePrefixMatch: /}
+            path: {type: ReplacePrefixMatch, replacePrefixMatch: /api}
       backendRefs:
         - name: exchange-service
           port: 8088
     - matches:
-        - path: {type: PathPrefix, value: /loan}
+        - path: {type: PathPrefix, value: /loan/api}
       filters:
         - type: URLRewrite
           urlRewrite:
-            path: {type: ReplacePrefixMatch, replacePrefixMatch: /}
+            path: {type: ReplacePrefixMatch, replacePrefixMatch: /api}
       backendRefs:
         - name: loan-service
           port: 8089
     - matches:
-        - path: {type: PathPrefix, value: /core}
+        - path: {type: PathPrefix, value: /core/api}
       filters:
         - type: URLRewrite
           urlRewrite:
-            path: {type: ReplacePrefixMatch, replacePrefixMatch: /}
+            path: {type: ReplacePrefixMatch, replacePrefixMatch: /api}
       backendRefs:
         - name: backend
           port: 8080
