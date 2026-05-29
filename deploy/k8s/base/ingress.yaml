@@ -2,209 +2,91 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: exbanka
-  namespace: exbanka
+  namespace: exbanka-3
   labels:
     app.kubernetes.io/name: exbanka
     app.kubernetes.io/part-of: exbanka
   annotations:
     nginx.ingress.kubernetes.io/proxy-body-size: 10m
+    # URL shape required by the cluster handoff: https://<domain>/<slug>/api/...
+    # Each slug regex captures the remainder so the upstream service sees the
+    # original /api/v1/... path it already serves — no backend code change.
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
 spec:
   ingressClassName: nginx
   rules:
+    # Replace exbanka.local with the domain provided by the professor.
     - host: exbanka.local
       http:
         paths:
-          - path: /api/v1/auth/
-            pathType: Prefix
+          - path: /auth(/|$)(.*)
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: auth-service
                 port:
                   name: http
-          - path: /api/v1/permissions
-            pathType: Exact
+          - path: /account(/|$)(.*)
+            pathType: ImplementationSpecific
             backend:
               service:
-                name: employee-service
+                name: account-service
                 port:
                   name: http
-          - path: /api/v1/employees
-            pathType: Prefix
-            backend:
-              service:
-                name: employee-service
-                port:
-                  name: http
-          - path: /api/v1/actuaries
-            pathType: Prefix
-            backend:
-              service:
-                name: employee-service
-                port:
-                  name: http
-          - path: /api/v1/clients
-            pathType: Prefix
+          - path: /client(/|$)(.*)
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: client-service
                 port:
                   name: http
-          - path: /api/v1/firme
-            pathType: Prefix
+          - path: /employee(/|$)(.*)
+            pathType: ImplementationSpecific
             backend:
               service:
-                name: account-service
+                name: employee-service
                 port:
                   name: http
-          - path: /api/v1/sifre-delatnosti
-            pathType: Prefix
-            backend:
-              service:
-                name: account-service
-                port:
-                  name: http
-          - path: /api/v1/currencies
-            pathType: Prefix
-            backend:
-              service:
-                name: account-service
-                port:
-                  name: http
-          - path: /api/v1/accounts/create
-            pathType: Prefix
-            backend:
-              service:
-                name: account-service
-                port:
-                  name: http
-          - path: /api/v1/accounts
-            pathType: Prefix
-            backend:
-              service:
-                name: account-service
-                port:
-                  name: http
-          - path: /api/v1/cards
-            pathType: Prefix
-            backend:
-              service:
-                name: account-service
-                port:
-                  name: http
-          - path: /api/v1/transfers
-            pathType: Prefix
+          - path: /transfer(/|$)(.*)
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: transfer-service
                 port:
                   name: http
-          - path: /api/v1/payments
-            pathType: Prefix
+          - path: /payment(/|$)(.*)
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: payment-service
                 port:
                   name: http
-          - path: /api/v1/prenos
-            pathType: Prefix
-            backend:
-              service:
-                name: payment-service
-                port:
-                  name: http
-          - path: /api/v1/recipients
-            pathType: Prefix
-            backend:
-              service:
-                name: payment-service
-                port:
-                  name: http
-          - path: /api/v1/exchanges
-            pathType: Prefix
+          - path: /exchange(/|$)(.*)
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: exchange-service
                 port:
                   name: http
-          - path: /api/v1/listings
-            pathType: Prefix
-            backend:
-              service:
-                name: exchange-service
-                port:
-                  name: http
-          - path: /api/v1/portfolio
-            pathType: Prefix
-            backend:
-              service:
-                name: exchange-service
-                port:
-                  name: http
-          - path: /api/v1/exchange
-            pathType: Prefix
-            backend:
-              service:
-                name: exchange-service
-                port:
-                  name: http
-          - path: /api/v1/orders
-            pathType: Prefix
-            backend:
-              service:
-                name: exchange-service
-                port:
-                  name: http
-          - path: /api/v1/tax
-            pathType: Prefix
-            backend:
-              service:
-                name: exchange-service
-                port:
-                  name: http
-          - path: /api/v1/otc
-            pathType: Prefix
-            backend:
-              service:
-                name: exchange-service
-                port:
-                  name: http
-          - path: /api/v1/interbank-otc
-            pathType: Prefix
-            backend:
-              service:
-                name: exchange-service
-                port:
-                  name: http
-          - path: /api/v1/funds
-            pathType: Prefix
-            backend:
-              service:
-                name: exchange-service
-                port:
-                  name: http
-          - path: /api/v1/loans
-            pathType: Prefix
+          - path: /loan(/|$)(.*)
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: loan-service
                 port:
                   name: http
-          - path: /api/
-            pathType: Prefix
+          - path: /core(/|$)(.*)
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: backend
                 port:
                   name: http
-          - path: /swagger
-            pathType: Prefix
-            backend:
-              service:
-                name: backend
-                port:
-                  name: http
-          - path: /
-            pathType: Prefix
+          # SPA + /config.js (served by the frontend container's nginx).
+          # Must remain last so it does not shadow the per-slug routes above.
+          - path: /()(.*)
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: frontend
