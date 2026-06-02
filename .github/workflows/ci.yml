@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  go:
+    name: Go Build & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: go.sum
+
+      # Generated proto code under gen/ is committed, so no buf step is needed
+      # here; we build/vet/test against the whole module like the backend repo.
+      - name: Build
+        run: go build ./...
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Test
+        run: go test ./...
+
+  manifests:
+    name: Validate K8s Manifests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # kubectl ships preinstalled on the GitHub-hosted ubuntu runner; `kubectl
+      # kustomize` renders each overlay so a broken kustomization is caught here
+      # instead of on the live cluster. (Rendering only — it does not validate
+      # against CRDs like the Crunchy PostgresCluster.)
+      - name: Render base manifests
+        run: kubectl kustomize deploy/k8s/base > /dev/null
+
+      - name: Render postgres manifests
+        run: kubectl kustomize deploy/postgres > /dev/null
