@@ -108,6 +108,57 @@ spec:
       backendRefs:
         - name: backend
           port: 8080
+    # Inbound inter-bank protocol (si-tx-proto, Celina 5). Professor mandate:
+    # every externally-reachable URL is https://<domain>/<service-name>/... , so
+    # partner banks reach our protocol under the /exchange slug — the same
+    # service-name the frontend already uses for the OTC UI (/exchange/api/...).
+    #
+    # exchange-service mounts the protocol at ROOT (/interbank, /public-stock,
+    # /negotiations, /user/ — see cmd/server/main.go), so each rule strips the
+    # /exchange prefix back down to /<route> with ReplacePrefixMatch. We keep
+    # these as explicit per-route rules (rather than broadening /exchange/api to
+    # /exchange) so the working frontend rule is left untouched.
+    #
+    # PathPrefix matches per path element, so /exchange/interbank does NOT match
+    # the local UI route /exchange/api/v1/interbank-otc. The partner-facing base
+    # URL we hand out is therefore https://exbanka-3.radenkovic.rs/exchange
+    # (the partner appends /interbank, /negotiations, … onto it).
+    - matches:
+        - path: {type: PathPrefix, value: /exchange/interbank}
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path: {type: ReplacePrefixMatch, replacePrefixMatch: /interbank}
+      backendRefs:
+        - name: exchange-service
+          port: 8088
+    - matches:
+        - path: {type: PathPrefix, value: /exchange/public-stock}
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path: {type: ReplacePrefixMatch, replacePrefixMatch: /public-stock}
+      backendRefs:
+        - name: exchange-service
+          port: 8088
+    - matches:
+        - path: {type: PathPrefix, value: /exchange/negotiations}
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path: {type: ReplacePrefixMatch, replacePrefixMatch: /negotiations}
+      backendRefs:
+        - name: exchange-service
+          port: 8088
+    - matches:
+        - path: {type: PathPrefix, value: /exchange/user}
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path: {type: ReplacePrefixMatch, replacePrefixMatch: /user}
+      backendRefs:
+        - name: exchange-service
+          port: 8088
     # Frontend SPA + /config.js + static assets — catchall, no rewrite, kept last.
     - matches:
         - path: {type: PathPrefix, value: /}
