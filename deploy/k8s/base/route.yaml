@@ -159,6 +159,15 @@ spec:
       backendRefs:
         - name: exchange-service
           port: 8088
+    - matches:
+        - path: {type: PathPrefix, value: /notification/api}
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path: {type: ReplacePrefixMatch, replacePrefixMatch: /api}
+      backendRefs:
+        - name: notification-service
+          port: 8090
     # Frontend SPA + /config.js + static assets — catchall, no rewrite, kept last.
     - matches:
         - path: {type: PathPrefix, value: /}

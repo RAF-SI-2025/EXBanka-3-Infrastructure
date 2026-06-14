@@ -178,6 +178,23 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  name: notification-service
+  namespace: exbanka-3
+  labels:
+    app.kubernetes.io/name: notification-service
+    app.kubernetes.io/part-of: exbanka
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: notification-service
+  ports:
+    - name: http
+      port: 8090
+      targetPort: http
+---
+apiVersion: v1
+kind: Service
+metadata:
   name: frontend
   namespace: exbanka-3
   labels:
